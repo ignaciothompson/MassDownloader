@@ -1,0 +1,24 @@
+
+# TODO
+
+- Tab system for different paths
+- Limiter of downloads at the same time
+- Compatibility with more types of links
+- Better renamer
+- Metadata of file gathering
+- Pause, resume, and cancel download by file and task
+- Better UI
+- Add support for scheduling downloads at specific times
+- Enable download prioritization
+- Incorporate authentication mechanisms for secured downloads
+- Add a download history/log feature
+- Support additional protocols (e.g., FTP, SFTP)
+- Implement desktop notifications upon download completion
+- Allow batch import of download URLs via a file
+- Enhance the GUI with theming options
+- Optimize download speed and resource utilization
+- Show download speed by file and total usage
+- Create a .exe installer
+
+- Organize structure of project
+- **Modularize the codebase by splitting functionalities into separate modules (downloader.py, utils.py, ui.py, main.py)**

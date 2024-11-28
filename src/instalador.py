@@ -54,11 +54,10 @@ def start_all_downloads(task_frames, window):
     print("Starting all downloads...")  # Debugging information
     for frame in task_frames:
         path = frame['path_entry']
-        custom_name = frame.get('custom_name', '')  # Retrieve custom name
         urls = frame['urls']  # Updated to handle individual URLs
         task_id = frame['taskId']
 
-        print(f"Task ID: {task_id}, Path: {path}, URLs: {urls}, Custom Name: {custom_name}")  # Debugging information
+        print(f"Task ID: {task_id}, Path: {path}, URLs: {urls}")  # Debugging information
 
         if not os.path.isdir(path):
             webview.windows[0].evaluate_js("displayError('Please select a valid download path.')")
@@ -77,13 +76,10 @@ def start_all_downloads(task_frames, window):
             file_extension = os.path.splitext(original_filename)[1]  # Includes the dot, e.g., '.mkv'
 
             if season_episode:
-                # Use custom name if provided
-                if custom_name:
-                    title = sanitize_title(custom_name)
-                else:
-                    title_part = original_filename.split(season_episode)[0]
-                    title = sanitize_title(title_part)
-                custom_filename = f"{title}.{season_episode}{file_extension}"
+                # Extract title by removing the season/episode part and extension
+                title_part = original_filename.split(season_episode)[0]
+                title = sanitize_title(title_part)
+                custom_filename = f"Its.Always.Sunny.In.Philadelphia.{season_episode}{file_extension}"
             else:
                 # Fallback to original filename if pattern not found
                 custom_filename = original_filename
@@ -123,7 +119,7 @@ def main():
     api = Api()  # Initialize Api without window parameter
     window = webview.create_window(
         "Multi-Download Manager",
-        "index.html",
+        "../assets/index.html",
         width=1000,
         height=800,
         js_api=api  # Register Api with js_api parameter
