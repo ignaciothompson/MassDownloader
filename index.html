@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Download Manager</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./styles.css" rel="stylesheet">
+</head>
+<body>
+    <div style="width: 1000px; height: 800px;">
+        <div class="row">
+            <div class="col-7">
+                <h4>Download Manager</h4>
+                <!-- Path Input -->
+                <div class="form-group">
+                    <label>Download Path:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control path" placeholder="Select download path">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="button" onclick="browseDirectory()">Browse</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- URL Input -->
+                <div class="form-group">
+                    <label>Download URL:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control url-input" placeholder="Enter download URL">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="addUrl()">Add</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Custom Name Input -->
+                <div class="form-group">
+                    <label>Custom Name:</label>
+                    <input type="text" class="form-control custom-name" placeholder="Enter custom name">
+                </div>
+                <!-- URL List -->
+                <ul id="url-list" class="list-group mb-3">
+                    <!-- URLs will be added here -->
+                </ul>
+                <button class="btn btn-success" onclick="startAllDownloads()">Start All Downloads</button>
+            </div>
+            <div class="col-5" id="sidebar">
+                <h4>Download Progress</h4>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let taskCounter = 0;
+        let urlList = [];
+
+        function addUrl() {
+            const urlInput = document.querySelector('.url-input');
+            const url = urlInput.value.trim();
+            const path = document.querySelector('.path').value.trim();
+
+            if (path === '') {
+                alert('Please select a download path.');
+                return;
+            }
+
+            if (url === '') {
+                alert('Please enter a download URL.');
+                return;
+            }
+
+            // Add URL to the list
+            urlList.push({ url: url });
+            renderUrlList();
+            urlInput.value = '';
+        }
+
+        function renderUrlList() {
+            const urlListContainer = document.getElementById('url-list');
+            urlListContainer.innerHTML = '';
+
+            urlList.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.textContent = item.url.length > 100 ? item.url.substring(0, 100) + '...' : item.url;
+                
+                // Remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = () => removeUrl(index);
+                
+                listItem.appendChild(removeBtn);
+                urlListContainer.appendChild(listItem);
+            });
+        }
+
+        function removeUrl(index) {
+            urlList.splice(index, 1);
+            renderUrlList();
+        }
+
+        function startAllDownloads() {
+            console.log("Starting all downloads...");  // Debugging information
+            const path = document.querySelector('.path').value.trim();
+            const customName = document.querySelector('.custom-name').value.trim();
+
+            if (urlList.length === 0) {
+                alert('Please add at least one download URL.');
+                return;
+            }
+
+            const taskFrames = [{
+                path_entry: path,
+                custom_name: customName,
+                urls: urlList,
+                taskId: ++taskCounter
+            }];
+
+            console.log("Task frames:", taskFrames);  // Debugging information
+            pywebview.api.start_all_downloads(taskFrames).then(() => {
+                console.log("Downloads started successfully");  // Debugging information
+                // Clear the URL list after starting downloads
+                urlList = [];
+                renderUrlList();
+                // Clear the custom name input
+                document.querySelector('.custom-name').value = '';
+            }).catch(error => {
+                console.error("Error starting downloads:", error);  // Debugging information
+            });
+        }
+
+        function updateProgress(taskId, fileIndex, progress) {
+            console.log(`Updating progress for Task ${taskId}, File ${fileIndex}: ${progress}%`);  // Debugging information
+            const progressBar = document.querySelector(`#task-${taskId}-file-${fileIndex} .progress-bar`);
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+                progressBar.setAttribute('aria-valuenow', progress);
+            }
+        }
+
+        function displayError(message) {
+            alert(message);
+        }
+
+        function addProgressBar(taskId, fileIndex, fileName) {
+            const sidebar = document.getElementById('sidebar');
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'task-progress';
+            progressContainer.id = `task-${taskId}-file-${fileIndex}`;
+            progressContainer.innerHTML = `
+                <div>${fileName}</div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            `;
+            sidebar.appendChild(progressContainer);
+        }
+
+        function browseDirectory() {
+            console.log("Browse button clicked");  // Debugging information
+            pywebview.api.browse_directory().then(directory => {
+                console.log("Directory selected:", directory);  // Debugging information
+                if (directory) {
+                    document.querySelector('.path').value = directory;
+                }
+            }).catch(error => {
+                console.error("Error selecting directory:", error);  // Debugging information
+            });
+        }
+
+        // Add one task by default when the page loads
+        document.addEventListener('DOMContentLoaded', (event) => {
+            addUrl();  // Optionally add an initial URL input
+        });
+    </script>
+</body>
+</html>

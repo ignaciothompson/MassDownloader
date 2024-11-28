@@ -1,0 +1,31 @@
+body {
+    background-color: #343032;
+    color: #FFFFFF;
+    font-family: Arial, sans-serif;
+}
+.task {
+    background-color: #454342;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+.task input, .task textarea {
+    width: 100%;
+    margin: 5px 0;
+}
+.task button {
+    background-color: #6C7A89;
+    color: #FFFFFF;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.task button:hover {
+    background-color: #5A6A75;
+}
+
+/* Additional Styles for URL List */
+#url-list .list-group-item {
+    word-break: break-all;
+    color: #343032;
+}
